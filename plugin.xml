@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-webtrc" version="0.0.0">
+    <name>cordova-webtrc</name>
+    <description>Cordova WebRTC Plugin</description>
+    <license>MIT</license>
+    <keywords>cordova,webrtc</keywords>
+    <js-module src="www/webrtc.js" name="webrtc">
+        <clobbers target="webrtc" />
+    </js-module>
+    <platform name="android">
+      <config-file target="AndroidManifest.xml" parent="/manifest">
+        <uses-permission android:name="android.permission.CAMERA" />
+        <uses-permission android:name="android.permission.INTERNET" />
+        <uses-permission android:name="android.permission.RECORD_AUDIO" />
+        <uses-permission android:name="android.permission.WAKE_LOCK" />
+        <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+        <uses-feature android:name="android.hardware.camera" android:required="true" />
+        <uses-feature android:name="android.hardware.camera.autofocus" android:required="true" />
+      </config-file>
+    </platform>
+    <platform name="ios">
+        <config-file parent="NSCameraUsageDescription" target="*-Info.plist">
+          <string>This Application uses your camera to make video calls.</string>
+        </config-file>
+        <config-file parent="NSContactsUsageDescription" target="*-Info.plist">
+          <string>This Application needs access to your contacts in order to be able to call them.</string>
+        </config-file>
+        <config-file parent="NSMicrophoneUsageDescription" target="*-Info.plist">
+          <string>This Application uses your microphone to make calls.</string>
+        </config-file>
+        <config-file parent="NSBluetoothAlwaysUsageDescription" target="*-Info.plist">
+          <string>This Application uses your wireless headphones and microphone to make calls.</string>
+        </config-file>
+        <podspec>
+            <config>
+                <source url="https://cdn.cocoapods.org/" />
+            </config>
+            <pods use-frameworks="true">
+                <pod name="GoogleWebRTC" spec="~> 1.1" />
+            </pods>
+        </podspec>
+    </platform>
+</plugin>
