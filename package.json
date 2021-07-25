@@ -1,4 +1,29 @@
 {
   "name": "cordova-webrtc",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "description": "Cordova Plugin to enable WebRTC",
+  "files": [
+    "*.md",
+    "*.xml",
+    "www"
+  ],
+  "keywords": [
+    "cordova",
+    "plugin",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "webrtc"
+  ],
+  "author": "Ratson",
+  "license": "MIT",
+  "repository": "ratson/cordova-webrtc",
+  "cordova": {
+    "id": "cordova-webrtc",
+    "platforms": [
+      "android",
+      "ios",
+      "browser"
+    ]
+  }
 }
