@@ -10,8 +10,9 @@ update `config.xml` with the following content,
 
 ```xml
 <widget>
-    <preference name="scheme" value="app" />
+    <preference name="scheme" value="https" />
     <preference name="hostname" value="localhost" />
+    <allow-navigation href="https://localhost/*"/>
     <platform name="ios">
         <preference name="AllowInlineMediaPlayback" value="true" />
     </platform>
