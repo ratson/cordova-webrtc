@@ -15,6 +15,8 @@ update `config.xml` with the following content,
     <allow-navigation href="https://localhost/*"/>
     <platform name="ios">
         <preference name="AllowInlineMediaPlayback" value="true" />
+        <preference name="deployment-target" value="14.3" />
+        <preference name="SwiftVersion" value="5.3" />
     </platform>
 </widget>
 ```

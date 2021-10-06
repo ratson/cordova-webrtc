@@ -5,6 +5,7 @@
   "files": [
     "*.md",
     "*.xml",
+    "src",
     "www"
   ],
   "keywords": [
