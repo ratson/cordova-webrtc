@@ -5,7 +5,7 @@
     <description>Cordova WebRTC Plugin</description>
     <license>MIT</license>
     <keywords>cordova,webrtc</keywords>
-    <js-module src="www/webrtc.js" name="webrtc">
+    <js-module name="WebRTC" src="www/webrtc.js">
         <clobbers target="webrtc" />
     </js-module>
     <platform name="android">
