@@ -30,4 +30,4 @@ class WebRTCPlugin {
   }
 }
 
-window.webrtc = new WebRTCPlugin();
+module.exports = new WebRTCPlugin();
