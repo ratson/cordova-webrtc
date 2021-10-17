@@ -8,15 +8,13 @@ public class SimplePeer {
         audioSession.isAudioEnabled = true
 
         let config = RTCAudioSessionConfiguration()
-        config.category = AVAudioSession.Category.multiRoute.rawValue
+        config.category = AVAudioSession.Category.playAndRecord.rawValue
         config.categoryOptions = [
             .allowAirPlay,
             .allowBluetooth,
             .allowBluetoothA2DP,
             .defaultToSpeaker,
             .mixWithOthers,
-            .duckOthers,
-            .interruptSpokenAudioAndMixWithOthers,
         ]
         config.mode = AVAudioSession.Mode.default.rawValue
 
