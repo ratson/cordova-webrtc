@@ -57,7 +57,6 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
                     optionalConstraints: nil)) { (desc, error) in
             guard let desc = desc else { return }
             pc.setLocalDescription(desc) { (error) in
-                print("pc.setLocalDescription")
                 if error != nil {
                     let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
                     self.commandDelegate.send(result, callbackId: command.callbackId)
@@ -152,6 +151,7 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         RTCDispatcher.dispatchAsync(on: .typeMain) {
             SimplePeer.configureAudioSession()
         }
+        self.emit("audioSessionDidStartPlayOrRecord")
     }
 
     public func audioSessionDidStopPlayOrRecord(_ session: RTCAudioSession) {

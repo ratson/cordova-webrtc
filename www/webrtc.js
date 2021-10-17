@@ -8,7 +8,7 @@ class WebRTCPlugin {
     document.addEventListener("deviceready", () => {
       cordova.exec(
         (event) => {
-          cordova.fireDocumentEvent(event.type, event.data);
+          cordova.fireDocumentEvent(`webrtc.__.${event.type}`, event.data);
         },
         () => {},
         "WebRTC",
