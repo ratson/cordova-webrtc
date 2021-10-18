@@ -28,6 +28,10 @@ class WebRTCPlugin {
   __candidate(desc) {
     return execAsync("candidate", [desc]);
   }
+
+  __setIsAudioEnabled(desc) {
+    return execAsync("setIsAudioEnabled", [desc]);
+  }
 }
 
 module.exports = new WebRTCPlugin();

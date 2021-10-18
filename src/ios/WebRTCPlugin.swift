@@ -109,7 +109,26 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         self.commandDelegate.send(result, callbackId: command.callbackId)
     }
 
+    @objc func setIsAudioEnabled(_ command: CDVInvokedUrlCommand) {
+        guard let optValue = command.argument(at: 0) as? Bool?,
+              let value = optValue else {
+            self.reject(command)
+            return
+        }
 
+        RTCAudioSession.sharedInstance().isAudioEnabled = value
+
+        self.resolve(command)
+    }
+
+    private func reject(_ command: CDVInvokedUrlCommand) {
+        let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
+        self.commandDelegate.send(result, callbackId: command.callbackId)
+    }
+    private func resolve(_ command: CDVInvokedUrlCommand) {
+        let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
+        self.commandDelegate.send(result, callbackId: command.callbackId)
+    }
 
     public func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
     }
