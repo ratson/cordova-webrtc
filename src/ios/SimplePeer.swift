@@ -5,7 +5,6 @@ public class SimplePeer {
 
     public static func configureAudioSession() {
         let audioSession = RTCAudioSession.sharedInstance()
-        audioSession.isAudioEnabled = true
 
         let config = RTCAudioSessionConfiguration()
         config.category = AVAudioSession.Category.playAndRecord.rawValue
