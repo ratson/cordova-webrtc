@@ -29,8 +29,8 @@ class WebRTCPlugin {
     return execAsync("candidate", [desc]);
   }
 
-  __setIsAudioEnabled(desc) {
-    return execAsync("setIsAudioEnabled", [desc]);
+  __configAudio(opts) {
+    return execAsync("configAudio", [opts]);
   }
 }
 
