@@ -2,11 +2,37 @@ import WebRTC
 
 @objc(WebRTCPlugin)
 public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessionDelegate {
-    var pcf: RTCPeerConnectionFactory!
     var pc: RTCPeerConnection!
-    var audioPlayer: AVAudioPlayer!
+    var sender: RTCRtpSender?
 
     var readyCallbackId: String!
+
+    lazy var pcf: RTCPeerConnectionFactory = {
+        let videoEncoderFactory = RTCDefaultVideoEncoderFactory()
+        let videoDecoderFactory = RTCDefaultVideoDecoderFactory()
+        return RTCPeerConnectionFactory(encoderFactory: videoEncoderFactory, decoderFactory: videoDecoderFactory)
+    }()
+
+    lazy var pcConfig: RTCConfiguration = {
+        let config = RTCConfiguration()
+        config.iceServers = []
+        config.sdpSemantics = .unifiedPlan
+        config.certificate = RTCCertificate.generate(withParams: ["expires" : 100000, "name" : "RSASSA-PKCS1-v1_5"])
+        return config
+    }()
+
+    lazy var offerConstraints: RTCMediaConstraints = {
+        return RTCMediaConstraints(
+            mandatoryConstraints: [kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueFalse,
+                                   kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue],
+            optionalConstraints: nil)
+    }()
+
+    lazy var audioTrack: RTCAudioTrack = {
+        let audioSource = pcf.audioSource(with: RTCMediaConstraints(mandatoryConstraints: [:], optionalConstraints: nil))
+        let audioTrack = pcf.audioTrack(with: audioSource, trackId: "ARDAMSa0")
+        return audioTrack
+    }()
 
     deinit {
         readyCallbackId = nil
@@ -19,10 +45,6 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
 
         let audioSession = RTCAudioSession.sharedInstance()
         audioSession.add(self)
-
-        let videoEncoderFactory = RTCDefaultVideoEncoderFactory()
-        let videoDecoderFactory = RTCDefaultVideoDecoderFactory()
-        pcf = RTCPeerConnectionFactory(encoderFactory: videoEncoderFactory, decoderFactory: videoDecoderFactory)
     }
 
     @objc func ready(_ command: CDVInvokedUrlCommand) {
@@ -36,25 +58,13 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
     }
 
     @objc func start(_ command: CDVInvokedUrlCommand) {
-        let audioSource = pcf.audioSource(with: RTCMediaConstraints(mandatoryConstraints: [:], optionalConstraints: nil))
-        let audioTrack = pcf.audioTrack(with: audioSource, trackId: "ARDAMSa0")
         let mediaTrackStreamIDs = ["ARDAMS"]
 
-        let session = RTCAudioSession.sharedInstance()
-        session.add(self)
-
-        let config = RTCConfiguration()
-        config.iceServers = []
-        config.sdpSemantics = .unifiedPlan
-        config.certificate = RTCCertificate.generate(withParams: ["expires" : 100000, "name" : "RSASSA-PKCS1-v1_5"])
-        let pc = pcf.peerConnection(with: config, constraints: SimplePeer.defaultMediaConstraints, delegate: self)
+        let pc = pcf.peerConnection(with: self.pcConfig, constraints: SimplePeer.defaultMediaConstraints, delegate: self)
         self.pc = pc
 
-        pc.add(audioTrack, streamIds: mediaTrackStreamIDs)
-        pc.offer(for: RTCMediaConstraints(
-                    mandatoryConstraints: ["OfferToReceiveVideo": kRTCMediaConstraintsValueFalse,
-                                           "OfferToReceiveAudio": kRTCMediaConstraintsValueTrue],
-                    optionalConstraints: nil)) { (desc, error) in
+        self.sender = pc.add(audioTrack, streamIds: mediaTrackStreamIDs)
+        pc.offer(for: self.offerConstraints) { (desc, error) in
             guard let desc = desc else { return }
             pc.setLocalDescription(desc) { (error) in
                 if error != nil {
