@@ -96,7 +96,7 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
 
         }
 
-        self.reolsve(command)
+        self.resolve(command)
     }
 
     @objc func candidate(_ command: CDVInvokedUrlCommand) {
