@@ -68,8 +68,7 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
             guard let desc = desc else { return }
             pc.setLocalDescription(desc) { (error) in
                 if error != nil {
-                    let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
-                    self.commandDelegate.send(result, callbackId: command.callbackId)
+                    self.reject(command)
                     return
                 }
             }
@@ -87,8 +86,7 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
               let optSdp = optDesc["sdp"],
               let desc = RTCSessionDescription(type: .answer, sdp: optSdp) as RTCSessionDescription?
         else {
-            let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
-            self.commandDelegate.send(result, callbackId: command.callbackId)
+            self.reject(command)
             return
         }
 
@@ -107,15 +105,13 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
                 sdpMid: optDesc["sdpMid"] as? String
               ) as RTCIceCandidate?
         else {
-            let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
-            self.commandDelegate.send(result, callbackId: command.callbackId)
+            self.reject(command)
             return
         }
 
         self.pc.add(candidate)
 
-        let result = CDVPluginResult(status: CDVCommandStatus_OK)
-        self.commandDelegate.send(result, callbackId: command.callbackId)
+        self.resolve(command)
     }
 
     @objc func configAudio(_ command: CDVInvokedUrlCommand) {
