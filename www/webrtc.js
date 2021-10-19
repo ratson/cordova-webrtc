@@ -32,6 +32,10 @@ class WebRTCPlugin {
   __configAudio(opts) {
     return execAsync("configAudio", [opts]);
   }
+
+  __toggleSender(enable) {
+    return execAsync("toggleSender", [enable]);
+  }
 }
 
 module.exports = new WebRTCPlugin();

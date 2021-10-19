@@ -173,6 +173,24 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         self.resolve(command)
     }
 
+    @objc func toggleSender(_ command: CDVInvokedUrlCommand) {
+        guard let enable = command.argument(at: 0) as? Bool,
+              let sender = self.sender else {
+            self.reject(command)
+            return
+        }
+
+        if enable {
+            if sender.track != self.audioTrack {
+                sender.track = self.audioTrack
+            }
+        } else {
+            pc.removeTrack(sender)
+        }
+
+        self.resolve(command)
+    }
+
     func resovleCategory(_ s: String?) -> AVAudioSession.Category? {
         switch s {
         case "ambient":
