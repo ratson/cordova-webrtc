@@ -96,8 +96,7 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
 
         }
 
-        let result = CDVPluginResult(status: CDVCommandStatus_OK)
-        self.commandDelegate.send(result, callbackId: command.callbackId)
+        self.reolsve(command)
     }
 
     @objc func candidate(_ command: CDVInvokedUrlCommand) {
@@ -215,7 +214,7 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         self.commandDelegate.send(result, callbackId: command.callbackId)
     }
     private func resolve(_ command: CDVInvokedUrlCommand) {
-        let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
+        let result = CDVPluginResult(status: CDVCommandStatus_OK)
         self.commandDelegate.send(result, callbackId: command.callbackId)
     }
 
