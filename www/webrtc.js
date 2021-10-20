@@ -1,6 +1,6 @@
-const execAsync = (...args) =>
+const execAsync = (method, ...args) =>
   new Promise((resolve, reject) => {
-    cordova.exec(resolve, reject, "WebRTC", ...args);
+    cordova.exec(resolve, reject, "WebRTC", method, args);
   });
 
 class WebRTCPlugin {
@@ -18,23 +18,23 @@ class WebRTCPlugin {
   }
 
   __start() {
-    return execAsync("start", []);
+    return execAsync("start");
   }
 
   __answer(desc) {
-    return execAsync("answer", [desc]);
+    return execAsync("answer", desc);
   }
 
   __candidate(desc) {
-    return execAsync("candidate", [desc]);
+    return execAsync("candidate", desc);
   }
 
   __configAudio(opts) {
-    return execAsync("configAudio", [opts]);
+    return execAsync("configAudio", opts);
   }
 
   __toggleSender(enable) {
-    return execAsync("toggleSender", [enable]);
+    return execAsync("toggleSender", enable);
   }
 }
 
