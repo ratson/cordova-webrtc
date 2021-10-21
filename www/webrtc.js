@@ -1,6 +1,8 @@
+const SERVICE = "WebRTC";
+
 const execAsync = (method, ...args) =>
   new Promise((resolve, reject) => {
-    cordova.exec(resolve, reject, "WebRTC", method, args);
+    cordova.exec(resolve, reject, SERVICE, method, args);
   });
 
 class WebRTCPlugin {
@@ -11,7 +13,7 @@ class WebRTCPlugin {
           cordova.fireDocumentEvent(`webrtc.__.${event.type}`, event.data);
         },
         () => {},
-        "WebRTC",
+        SERVICE,
         "ready",
       );
     }, false);
