@@ -273,8 +273,9 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
 
 extension WebRTCPlugin {
     @objc func agentStart(_ command: CDVInvokedUrlCommand) {
-        self.agent.offer()
-        self.resolve(command)
+        self.agent.offer() { _, _ in
+            self.resolve(command)
+        }
     }
 
     @objc func agentAnswer(_ command: CDVInvokedUrlCommand) {
@@ -373,12 +374,18 @@ class Agent: NSObject {
         super.init()
     }
 
-    func offer() {
+    func offer(completionHandler: ((RTCSessionDescription?, Error?) -> Void)? = nil) {
         pc.offer(for: self.offerConstraints) { (desc, error) in
-            guard let desc = desc else { return }
+            guard let desc = desc else {
+                completionHandler?(nil, error)
+                return
+            }
 
             self.pc.setLocalDescription(desc) { error in
-                if error != nil { return }
+                if error != nil {
+                    completionHandler?(desc, error)
+                    return
+                }
 
                 self.plugin.emit("agent.offer", data: [
                     "offer": [
@@ -386,6 +393,7 @@ class Agent: NSObject {
                         "sdp": desc.sdp,
                     ]
                 ])
+                completionHandler?(desc, nil)
             }
         }
     }

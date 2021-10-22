@@ -6,13 +6,20 @@ const execAsync = (method, ...args) =>
   });
 
 class Agent {
+  _isNegotiating = false;
+
   constructor() {
     const pc = new RTCPeerConnection({});
     this._pc = pc;
 
     pc.onicecandidate = async (event) => {
       if (event.candidate) {
-        await execAsync("agentCandidate", e.candidate);
+        await execAsync("agentCandidate", event.candidate);
+      }
+    };
+    pc.onsignalingstatechange = () => {
+      if (pc.signalingState === "stable") {
+        this._isNegotiating = false;
       }
     };
     pc.ontrack = (event) => {
@@ -21,11 +28,8 @@ class Agent {
     };
 
     document.addEventListener("webrtc.agent.offer", async (data) => {
-      await pc.setRemoteDescription(data.offer);
-
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      await execAsync("agentAnswer", answer);
+      this._isNegotiating = true;
+      await this._answer(data.offer);
     }, false);
 
     document.addEventListener("webrtc.agent.candidate", (data) => {
@@ -40,14 +44,14 @@ class Agent {
     }
 
     const streamPromise = new Promise((resolve) => {
-      pc.addEventListener("track", (e) => {
+      this._pc.addEventListener("track", (e) => {
         const stream = e.streams[0];
         resolve(stream);
       }, { once: true, passive: true });
     });
 
-    await execAsync("agentStart");
     await this.toggleSend(true);
+    await execAsync("agentStart");
     this._stream = await streamPromise;
     return this._stream;
   }
@@ -63,6 +67,15 @@ class Agent {
   async toggleSend(enable) {
     return execAsync("agentSend", enable);
   }
+
+  async _answer(offer) {
+    const pc = this._pc;
+    await pc.setRemoteDescription(offer);
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await execAsync("agentAnswer", answer);
+  }
 }
 
 class WebRTCPlugin {
@@ -72,6 +85,7 @@ class WebRTCPlugin {
     document.addEventListener("deviceready", () => {
       cordova.exec(
         (event) => {
+          if (!event || !event.type) return;
           cordova.fireDocumentEvent(`webrtc.${event.type}`, event.data);
         },
         () => {},
