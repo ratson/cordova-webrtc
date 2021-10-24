@@ -124,7 +124,7 @@ class WebRTCPlugin {
       | "videoChat"
       | "videoRecording"
       | "voicePrompt";
-    port?: "speaker" | "none";
+    portOverride?: "speaker" | "none";
   }) {
     const category = opts.category
       ? `AVAudioSessionCategory${opts.category[0].toUpperCase()}${

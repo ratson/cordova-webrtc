@@ -206,7 +206,7 @@ extension WebRTCPlugin {
               let category = opt["category"] as? String?,
               let inputGain = opt["inputGain"] as? Float?,
               let mode = opt["mode"] as? String?,
-              let port = opt["port"] as? String?
+              let portOverride = opt["portOverride"] as? String?
         else {
             self.reject(command)
             return
@@ -237,7 +237,7 @@ extension WebRTCPlugin {
                 let mode = AVAudioSession.Mode(rawValue: v)
                 try audioSession.setMode(mode.rawValue)
             }
-            if let v = port {
+            if let v = portOverride {
                 if v == "speaker" {
                     try audioSession.overrideOutputAudioPort(.speaker)
                 } else {
