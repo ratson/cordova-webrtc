@@ -6,7 +6,9 @@
     "version": "sync-pkg-version --cordova-plugin"
   },
   "devDependencies": {
-    "sync-pkg-version": "^1.0.0"
+    "@types/cordova": "^0.0.34",
+    "sync-pkg-version": "^1.0.0",
+    "typescript": "^4.4.4"
   },
   "files": [
     "*.md",

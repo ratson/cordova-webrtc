@@ -1,12 +1,16 @@
+/// <reference types="cordova" />
+
 const SERVICE = "WebRTC";
 
-const execAsync = (method, ...args) =>
+const execAsync = (method: string, ...args: unknown[]) =>
   new Promise((resolve, reject) => {
     cordova.exec(resolve, reject, SERVICE, method, args);
   });
 
 class Agent {
   _isNegotiating = false;
+  _pc: RTCPeerConnection;
+  _stream: MediaStream | undefined;
 
   constructor() {
     const pc = new RTCPeerConnection({});
@@ -27,12 +31,16 @@ class Agent {
       this._stream = stream;
     };
 
-    document.addEventListener("webrtc.agent.offer", async (data) => {
-      this._isNegotiating = true;
-      await this._answer(data.offer);
-    }, false);
+    document.addEventListener(
+      "webrtc.agent.offer",
+      async (data: any) => {
+        this._isNegotiating = true;
+        await this._answer(data.offer);
+      },
+      false,
+    );
 
-    document.addEventListener("webrtc.agent.candidate", (data) => {
+    document.addEventListener("webrtc.agent.candidate", (data: any) => {
       pc.addIceCandidate(data.candidate);
     }, false);
   }
@@ -43,7 +51,7 @@ class Agent {
       return this._stream;
     }
 
-    const streamPromise = new Promise((resolve) => {
+    const streamPromise = new Promise<MediaStream>((resolve) => {
       this._pc.addEventListener("track", (e) => {
         const stream = e.streams[0];
         resolve(stream);
@@ -56,7 +64,7 @@ class Agent {
     return this._stream;
   }
 
-  async addStream(stream) {
+  async addStream(stream: MediaStream) {
     const pc = this._pc;
     stream.getTracks().forEach((track) => {
       pc.addTrack(track, stream);
@@ -64,11 +72,11 @@ class Agent {
     await execAsync("agentStart");
   }
 
-  async toggleSend(enable) {
+  async toggleSend(enable: boolean) {
     return execAsync("agentSend", enable);
   }
 
-  async _answer(offer) {
+  async _answer(offer: RTCSessionDescriptionInit) {
     const pc = this._pc;
     await pc.setRemoteDescription(offer);
 
@@ -86,6 +94,7 @@ class WebRTCPlugin {
       cordova.exec(
         (event) => {
           if (!event || !event.type) return;
+          // @ts-expect-error
           cordova.fireDocumentEvent(`webrtc.${event.type}`, event.data);
         },
         () => {},
@@ -116,4 +125,4 @@ class WebRTCPlugin {
   }
 }
 
-module.exports = new WebRTCPlugin();
+export default new WebRTCPlugin();
