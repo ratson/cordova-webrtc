@@ -116,14 +116,14 @@ class WebRTCPlugin {
       | "record"
       | "soloAmbient";
     mode?:
-      | "voicePrompt"
-      | "videoRecording"
-      | "videoChat"
-      | "spokenAudio"
-      | "moviePlayback"
-      | "measurement"
+      | "default"
       | "gameChat"
-      | "default";
+      | "measurement"
+      | "moviePlayback"
+      | "spokenAudio"
+      | "videoChat"
+      | "videoRecording"
+      | "voicePrompt";
     port?: "speaker" | "none";
   }) {
     const category = opts.category
@@ -132,9 +132,7 @@ class WebRTCPlugin {
       }`
       : undefined;
     const mode = opts.mode
-      ? `AVAudioSessionCategory${opts.mode[0].toUpperCase()}${
-        opts.mode.substr(1)
-      }`
+      ? `AVAudioSessionMode${opts.mode[0].toUpperCase()}${opts.mode.substr(1)}`
       : undefined;
     return execAsync("configAudio", { ...opts, category, mode });
   }
