@@ -1,0 +1,6 @@
+{
+  "extends": "cordova-plus/plugin/tsconfig",
+  "compilerOptions": {
+    "target": "es2017"
+  }
+}
