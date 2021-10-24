@@ -4,7 +4,7 @@
   "description": "Cordova Plugin to enable WebRTC",
   "scripts": {
     "prepublishOnly": "yarn build",
-    "version": "cordova-plus plugin version",
+    "version": "yarn cordova-plus plugin version",
     "build": "cordova-plus plugin build"
   },
   "devDependencies": {
