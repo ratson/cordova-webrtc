@@ -118,60 +118,6 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         self.resolve(command)
     }
 
-    @objc func configAudio(_ command: CDVInvokedUrlCommand) {
-        guard let opt = command.argument(at: 0) as? Dictionary<String, Any>,
-              let active = opt["active"] as? Bool?,
-              let isAudioEnabled = opt["isAudioEnabled"] as? Bool?,
-              let category = opt["category"] as? String?,
-              let inputGain = opt["inputGain"] as? Float?,
-              let mode = opt["mode"] as? String?,
-              let port = opt["port"] as? String?
-        else {
-            self.reject(command)
-            return
-        }
-
-        let audioSession = RTCAudioSession.sharedInstance()
-
-        if let v = isAudioEnabled {
-            audioSession.isAudioEnabled = v
-        }
-
-        audioSession.lockForConfiguration()
-        do {
-            if let v = resovleCategory(category) {
-                try audioSession.setCategory(v.rawValue, with: [
-                    .allowAirPlay,
-                    .allowBluetooth,
-                    .allowBluetoothA2DP,
-                    .defaultToSpeaker,
-                    .mixWithOthers,
-                ])
-            }
-            if let v = inputGain {
-                try audioSession.setInputGain(v)
-            }
-            if let v = mode {
-                try audioSession.setMode(v)
-            }
-            if let v = port {
-                if v == "speaker" {
-                    try audioSession.overrideOutputAudioPort(.speaker)
-                } else {
-                    try audioSession.overrideOutputAudioPort(.none)
-                }
-            }
-            if let v = active {
-                try audioSession.setActive(v)
-            }
-        } catch let error {
-            print("Error changeing AVAudioSession category: \(error)")
-        }
-        audioSession.unlockForConfiguration()
-
-        self.resolve(command)
-    }
-
     @objc func toggleSender(_ command: CDVInvokedUrlCommand) {
         guard let enable = command.argument(at: 0) as? Bool,
               let sender = self.sender else {
@@ -188,25 +134,6 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         }
 
         self.resolve(command)
-    }
-
-    func resovleCategory(_ s: String?) -> AVAudioSession.Category? {
-        switch s {
-        case "ambient":
-            return AVAudioSession.Category.ambient
-        case "playAndRecord":
-            return AVAudioSession.Category.playAndRecord
-        case "multiRoute":
-            return AVAudioSession.Category.multiRoute
-        case "playback":
-            return AVAudioSession.Category.playback
-        case "record":
-            return AVAudioSession.Category.record
-        case "soloAmbient":
-            return AVAudioSession.Category.soloAmbient
-        default:
-            return nil
-        }
     }
 
     public func reject(_ command: CDVInvokedUrlCommand) {
@@ -268,6 +195,64 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         RTCDispatcher.dispatchAsync(on: .typeMain) {
             SimplePeer.configureAudioSession()
         }
+    }
+}
+
+extension WebRTCPlugin {
+    @objc func configAudio(_ command: CDVInvokedUrlCommand) {
+        guard let opt = command.argument(at: 0) as? Dictionary<String, Any>,
+              let active = opt["active"] as? Bool?,
+              let isAudioEnabled = opt["isAudioEnabled"] as? Bool?,
+              let category = opt["category"] as? String?,
+              let inputGain = opt["inputGain"] as? Float?,
+              let mode = opt["mode"] as? String?,
+              let port = opt["port"] as? String?
+        else {
+            self.reject(command)
+            return
+        }
+
+        let audioSession = RTCAudioSession.sharedInstance()
+
+        if let v = isAudioEnabled {
+            audioSession.isAudioEnabled = v
+        }
+
+        audioSession.lockForConfiguration()
+
+        do {
+            if let v = category {
+                let category = AVAudioSession.Category(rawValue: v)
+                try audioSession.setCategory(category.rawValue, with: [
+                    .allowAirPlay,
+                    .allowBluetooth,
+                    .allowBluetoothA2DP,
+                    .mixWithOthers,
+                ])
+            }
+            if let v = inputGain {
+                try audioSession.setInputGain(v)
+            }
+            if let v = mode {
+                let mode = AVAudioSession.Mode(rawValue: v)
+                try audioSession.setMode(mode.rawValue)
+            }
+            if let v = port {
+                if v == "speaker" {
+                    try audioSession.overrideOutputAudioPort(.speaker)
+                } else {
+                    try audioSession.overrideOutputAudioPort(.none)
+                }
+            }
+            if let v = active {
+                try audioSession.setActive(v)
+            }
+        } catch let error {
+            print("Error changeing AVAudioSession category: \(error)")
+        }
+        audioSession.unlockForConfiguration()
+
+        self.resolve(command)
     }
 }
 

@@ -104,6 +104,41 @@ class WebRTCPlugin {
     }, false);
   }
 
+  configAudio(opts: {
+    active?: boolean;
+    isAudioEnabled?: boolean;
+    inputGain?: number;
+    category?:
+      | "ambient"
+      | "multiRoute"
+      | "playAndRecord"
+      | "playback"
+      | "record"
+      | "soloAmbient";
+    mode?:
+      | "voicePrompt"
+      | "videoRecording"
+      | "videoChat"
+      | "spokenAudio"
+      | "moviePlayback"
+      | "measurement"
+      | "gameChat"
+      | "default";
+    port?: "speaker" | "none";
+  }) {
+    const category = opts.category
+      ? `AVAudioSessionCategory${opts.category[0].toUpperCase()}${
+        opts.category.substr(1)
+      }`
+      : undefined;
+    const mode = opts.mode
+      ? `AVAudioSessionCategory${opts.mode[0].toUpperCase()}${
+        opts.mode.substr(1)
+      }`
+      : undefined;
+    return execAsync("configAudio", { ...opts, category, mode });
+  }
+
   __start() {
     return execAsync("start");
   }
@@ -114,10 +149,6 @@ class WebRTCPlugin {
 
   __candidate(desc) {
     return execAsync("candidate", desc);
-  }
-
-  __configAudio(opts) {
-    return execAsync("configAudio", opts);
   }
 
   __toggleSender(enable) {
