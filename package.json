@@ -3,11 +3,11 @@
   "version": "0.2.7",
   "description": "Cordova Plugin to enable WebRTC",
   "scripts": {
-    "version": "sync-pkg-version --cordova-plugin"
+    "version": "cordova-plus plugin version"
   },
   "devDependencies": {
     "@types/cordova": "^0.0.34",
-    "sync-pkg-version": "^1.0.0",
+    "cordova-plus": "^0.0.1",
     "typescript": "^4.4.4"
   },
   "files": [
