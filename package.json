@@ -2,6 +2,12 @@
   "name": "cordova-webrtc",
   "version": "0.2.7",
   "description": "Cordova Plugin to enable WebRTC",
+  "scripts": {
+    "version": "sync-pkg-version --cordova-plugin"
+  },
+  "devDependencies": {
+    "sync-pkg-version": "^1.0.0"
+  },
   "files": [
     "*.md",
     "*.xml",
