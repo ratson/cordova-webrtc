@@ -10,7 +10,6 @@ public class SimplePeer {
         config.category = AVAudioSession.Category.playAndRecord.rawValue
         config.categoryOptions = [
             .allowAirPlay,
-            .allowBluetooth,
             .allowBluetoothA2DP,
             .defaultToSpeaker,
             .mixWithOthers,

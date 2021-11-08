@@ -225,7 +225,6 @@ extension WebRTCPlugin {
                 let category = AVAudioSession.Category(rawValue: v)
                 try audioSession.setCategory(category.rawValue, with: [
                     .allowAirPlay,
-                    .allowBluetooth,
                     .allowBluetoothA2DP,
                     .mixWithOthers,
                 ])
