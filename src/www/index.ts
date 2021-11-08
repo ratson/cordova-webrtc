@@ -136,22 +136,6 @@ class WebRTCPlugin {
       : undefined;
     return execAsync("configAudio", { ...opts, category, mode });
   }
-
-  __start() {
-    return execAsync("start");
-  }
-
-  __answer(desc) {
-    return execAsync("answer", desc);
-  }
-
-  __candidate(desc) {
-    return execAsync("candidate", desc);
-  }
-
-  __toggleSender(enable) {
-    return execAsync("toggleSender", enable);
-  }
 }
 
 export default new WebRTCPlugin();

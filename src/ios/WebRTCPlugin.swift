@@ -1,40 +1,10 @@
 import WebRTC
 
 @objc(WebRTCPlugin)
-public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessionDelegate {
+public class WebRTCPlugin : CDVPlugin {
     lazy var agent: Agent = { return Agent(self) } ()
 
-    var pc: RTCPeerConnection!
-    var sender: RTCRtpSender?
-
     var readyCallbackId: String?
-
-    lazy var pcf: RTCPeerConnectionFactory = {
-        let videoEncoderFactory = RTCDefaultVideoEncoderFactory()
-        let videoDecoderFactory = RTCDefaultVideoDecoderFactory()
-        return RTCPeerConnectionFactory(encoderFactory: videoEncoderFactory, decoderFactory: videoDecoderFactory)
-    }()
-
-    lazy var pcConfig: RTCConfiguration = {
-        let config = RTCConfiguration()
-        config.iceServers = []
-        config.sdpSemantics = .unifiedPlan
-        config.certificate = RTCCertificate.generate(withParams: ["expires" : 100000, "name" : "RSASSA-PKCS1-v1_5"])
-        return config
-    }()
-
-    lazy var offerConstraints: RTCMediaConstraints = {
-        return RTCMediaConstraints(
-            mandatoryConstraints: [kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueFalse,
-                                   kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue],
-            optionalConstraints: nil)
-    }()
-
-    lazy var audioTrack: RTCAudioTrack = {
-        let audioSource = pcf.audioSource(with: RTCMediaConstraints(mandatoryConstraints: [:], optionalConstraints: nil))
-        let audioTrack = pcf.audioTrack(with: audioSource, trackId: "ARDAMSa0")
-        return audioTrack
-    }()
 
     deinit {
         readyCallbackId = nil
@@ -44,9 +14,6 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         super.pluginInitialize()
 
         SimplePeer.initialize()
-
-        let audioSession = RTCAudioSession.sharedInstance()
-        audioSession.add(self)
     }
 
     @objc func ready(_ command: CDVInvokedUrlCommand) {
@@ -61,81 +28,6 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
         self.commandDelegate.send(result, callbackId: callbackId)
     }
 
-    @objc func start(_ command: CDVInvokedUrlCommand) {
-        let mediaTrackStreamIDs = ["ARDAMS"]
-
-        let pc = pcf.peerConnection(with: self.pcConfig, constraints: SimplePeer.defaultMediaConstraints, delegate: self)
-        self.pc = pc
-
-        self.sender = pc.add(audioTrack, streamIds: mediaTrackStreamIDs)
-        pc.offer(for: self.offerConstraints) { (desc, error) in
-            guard let desc = desc else { return }
-            pc.setLocalDescription(desc) { (error) in
-                if error != nil {
-                    self.reject(command)
-                    return
-                }
-            }
-
-            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: [
-                "type": RTCSessionDescription.string(for: desc.type),
-                "sdp": desc.sdp,
-            ])
-            self.commandDelegate.send(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc func answer(_ command: CDVInvokedUrlCommand) {
-        guard let optDesc = command.argument(at: 0) as? Dictionary<String, String>,
-              let optSdp = optDesc["sdp"],
-              let desc = RTCSessionDescription(type: .answer, sdp: optSdp) as RTCSessionDescription?
-        else {
-            self.reject(command)
-            return
-        }
-
-        pc.setRemoteDescription(desc) { error in
-
-        }
-
-        self.resolve(command)
-    }
-
-    @objc func candidate(_ command: CDVInvokedUrlCommand) {
-        guard let optDesc = command.argument(at: 0) as? Dictionary<String, Any>,
-              let candidate = RTCIceCandidate(
-                sdp: optDesc["candidate"] as! String,
-                sdpMLineIndex: optDesc["sdpMLineIndex"] as! Int32,
-                sdpMid: optDesc["sdpMid"] as? String
-              ) as RTCIceCandidate?
-        else {
-            self.reject(command)
-            return
-        }
-
-        self.pc.add(candidate)
-
-        self.resolve(command)
-    }
-
-    @objc func toggleSender(_ command: CDVInvokedUrlCommand) {
-        guard let enable = command.argument(at: 0) as? Bool,
-              let sender = self.sender else {
-            self.reject(command)
-            return
-        }
-
-        if enable {
-            if sender.track != self.audioTrack {
-                sender.track = self.audioTrack
-            }
-        } else {
-            pc.removeTrack(sender)
-        }
-
-        self.resolve(command)
-    }
-
     public func reject(_ command: CDVInvokedUrlCommand) {
         let result = CDVPluginResult(status: CDVCommandStatus_ERROR)
         self.commandDelegate.send(result, callbackId: command.callbackId)
@@ -143,58 +35,6 @@ public class WebRTCPlugin : CDVPlugin, RTCPeerConnectionDelegate, RTCAudioSessio
     public func resolve(_ command: CDVInvokedUrlCommand) {
         let result = CDVPluginResult(status: CDVCommandStatus_OK)
         self.commandDelegate.send(result, callbackId: command.callbackId)
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
-    }
-
-    public func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
-        self.emit("__candidate", data: [
-            "type": "candidate",
-            "candidate": [
-                "candidate": candidate.sdp,
-                "sdpMLineIndex": candidate.sdpMLineIndex,
-                "sdpMid": candidate.sdpMid!
-            ]
-        ])
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {
-    }
-
-    public func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
-    }
-
-    public func audioSessionDidStartPlayOrRecord(_ session: RTCAudioSession) {
-        RTCDispatcher.dispatchAsync(on: .typeMain) {
-            SimplePeer.configureAudioSession()
-        }
-        self.emit("__audioSessionDidStartPlayOrRecord")
-    }
-
-    public func audioSessionDidStopPlayOrRecord(_ session: RTCAudioSession) {
-    }
-
-    public func audioSession(_ session: RTCAudioSession, didChangeCanPlayOrRecord canPlayOrRecord: Bool) {
-        RTCDispatcher.dispatchAsync(on: .typeMain) {
-            SimplePeer.configureAudioSession()
-        }
     }
 }
 
@@ -356,6 +196,9 @@ class Agent: NSObject {
         self.plugin = plugin
 
         super.init()
+
+        let audioSession = RTCAudioSession.sharedInstance()
+        audioSession.add(self)
     }
 
     func offer(completionHandler: ((RTCSessionDescription?, Error?) -> Void)? = nil) {
