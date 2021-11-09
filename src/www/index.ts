@@ -12,6 +12,8 @@ class Agent {
   _pc: RTCPeerConnection;
   _stream: MediaStream | undefined;
 
+  _unregisterEvents: () => void;
+
   constructor() {
     const pc = new RTCPeerConnection({});
     this._pc = pc;
@@ -27,22 +29,36 @@ class Agent {
       }
     };
     pc.ontrack = (event) => {
-      const stream = event.streams[0];
-      this._stream = stream;
+      if (event.streams && event.streams[0]) {
+        const stream = event.streams[0];
+        this._stream = stream;
+      } else {
+        const inboundStream = new MediaStream();
+        inboundStream.addTrack(event.track);
+        this._stream = inboundStream;
+      }
     };
 
-    document.addEventListener(
-      "webrtc.agent.offer",
-      async (data: any) => {
-        this._isNegotiating = true;
-        await this._answer(data.offer);
-      },
-      false,
-    );
+    this._unregisterEvents = this._registerEvents();
+  }
 
-    document.addEventListener("webrtc.agent.candidate", (data: any) => {
+  _registerEvents() {
+    const onOffer = async (data: any) => {
+      this._isNegotiating = true;
+      await this._answer(data.offer);
+    };
+    document.addEventListener("webrtc.agent.offer", onOffer, false);
+
+    const pc = this._pc;
+    const onCandidate = (data: any) => {
       pc.addIceCandidate(data.candidate);
-    }, false);
+    };
+    document.addEventListener("webrtc.agent.candidate", onCandidate, false);
+
+    return () => {
+      document.removeEventListener("webrtc.agent.offer", onOffer);
+      document.removeEventListener("webrtc.agent.candidate", onCandidate);
+    };
   }
 
   async getStream() {
@@ -83,6 +99,11 @@ class Agent {
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     await execAsync("agentAnswer", answer);
+  }
+
+  close() {
+    this._unregisterEvents();
+    this._pc.close();
   }
 }
 
@@ -135,6 +156,12 @@ class WebRTCPlugin {
       ? `AVAudioSessionMode${opts.mode[0].toUpperCase()}${opts.mode.substr(1)}`
       : undefined;
     return execAsync("configAudio", { ...opts, category, mode });
+  }
+
+  async renewAgent() {
+    await execAsync("renewAgent");
+    this.agent.close();
+    this.agent = new Agent();
   }
 }
 

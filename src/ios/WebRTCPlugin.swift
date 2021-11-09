@@ -20,6 +20,11 @@ public class WebRTCPlugin : CDVPlugin {
         readyCallbackId = command.callbackId
     }
 
+    @objc func renewAgent(_ command: CDVInvokedUrlCommand) {
+        self.agent = Agent(self)
+        self.resolve(command)
+    }
+
     func emit(_ eventName: String, data: Any = NSNull()) {
         guard let callbackId = readyCallbackId else { return }
 
@@ -199,6 +204,13 @@ class Agent: NSObject {
 
         let audioSession = RTCAudioSession.sharedInstance()
         audioSession.add(self)
+    }
+
+    deinit {
+        RTCAudioSession.sharedInstance().remove(self)
+
+        pc.close()
+        pc.delegate = nil
     }
 
     func offer(completionHandler: ((RTCSessionDescription?, Error?) -> Void)? = nil) {
