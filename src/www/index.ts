@@ -1,10 +1,13 @@
-/// <reference types="cordova" />
+/// <reference types="cordova-plus/types" />
+
+import channel from "cordova/channel";
+import exec from "cordova/exec";
 
 const SERVICE = "WebRTC";
 
 const execAsync = (method: string, ...args: unknown[]) =>
   new Promise((resolve, reject) => {
-    cordova.exec(resolve, reject, SERVICE, method, args);
+    exec(resolve, reject, SERVICE, method, args);
   });
 
 class Agent {
@@ -110,21 +113,6 @@ class Agent {
 class WebRTCPlugin {
   agent = new Agent();
 
-  constructor() {
-    document.addEventListener("deviceready", () => {
-      cordova.exec(
-        (event) => {
-          if (!event || !event.type) return;
-          // @ts-expect-error
-          cordova.fireDocumentEvent(`webrtc.${event.type}`, event.data);
-        },
-        () => {},
-        SERVICE,
-        "ready",
-      );
-    }, false);
-  }
-
   configAudio(opts: {
     active?: boolean;
     isAudioEnabled?: boolean;
@@ -164,5 +152,19 @@ class WebRTCPlugin {
     this.agent = new Agent();
   }
 }
+
+function onMessageFromNative(event: any) {
+  if (!event || !event.type) return;
+  cordova.fireDocumentEvent(`webrtc.${event.type}`, event.data);
+}
+
+const feature = "onWebRTCReady";
+channel.createSticky(feature);
+channel.waitForInitialization(feature);
+
+channel.onCordovaReady.subscribe(() => {
+  exec(onMessageFromNative, console.error, SERVICE, "ready", []);
+  channel.initializationComplete(feature);
+});
 
 export default new WebRTCPlugin();
