@@ -1,6 +1,6 @@
 {
   "name": "cordova-webrtc",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Cordova Plugin to enable WebRTC",
   "scripts": {
     "prepublishOnly": "yarn build",
