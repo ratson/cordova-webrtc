@@ -243,13 +243,7 @@ class Agent: NSObject {
 
     func enableSender(_ enable: Bool) {
         if let sender = self.sender {
-            if enable {
-                if sender.track != self.audioTrack {
-                    sender.track = self.audioTrack
-                }
-            } else {
-                pc.removeTrack(sender)
-            }
+            sender.track = enable ? self.audioTrack : nil
         } else if enable {
             self.sender = pc.add(audioTrack, streamIds: ["ARDAMS"])
         }
