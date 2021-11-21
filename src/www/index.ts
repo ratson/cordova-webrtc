@@ -18,14 +18,33 @@ class Agent {
   _unregisterEvents: () => void;
 
   constructor() {
-    const pc = new RTCPeerConnection({});
+    const pc = new RTCPeerConnection({
+      // @ts-expect-error
+      sdpSemantics: "unified-plan",
+    });
     this._pc = pc;
 
+    pc.onconnectionstatechange = (event) => {
+      switch (pc.connectionState) {
+        case "connected":
+          // The connection has become fully connected
+          break;
+        case "disconnected":
+        case "failed":
+          // One or more transports has terminated unexpectedly or in an error
+          break;
+        case "closed":
+          // The connection has been closed
+          break;
+      }
+    };
     pc.onicecandidate = async (event) => {
       if (event.candidate) {
         await execAsync("agentCandidate", event.candidate);
       }
     };
+    pc.onnegotiationneeded = () => {
+    }
     pc.onsignalingstatechange = () => {
       if (pc.signalingState === "stable") {
         this._isNegotiating = false;
