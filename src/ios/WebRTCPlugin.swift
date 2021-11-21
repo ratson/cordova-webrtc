@@ -14,6 +14,11 @@ public class WebRTCPlugin : CDVPlugin {
         super.pluginInitialize()
 
         SimplePeer.initialize()
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(Self.handleAudioSessionInterruption(_:)),
+            name: AVAudioSession.interruptionNotification,
+            object: nil)
     }
 
     @objc func ready(_ command: CDVInvokedUrlCommand) {
@@ -40,6 +45,27 @@ public class WebRTCPlugin : CDVPlugin {
     public func resolve(_ command: CDVInvokedUrlCommand) {
         let result = CDVPluginResult(status: CDVCommandStatus_OK)
         self.commandDelegate.send(result, callbackId: command.callbackId)
+    }
+}
+
+extension WebRTCPlugin {
+    @objc func handleAudioSessionInterruption(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+
+        var data: Dictionary<String, Any> = [:]
+        switch type {
+        case .began:
+            data["type"] = "began"
+        case .ended:
+            data["type"] = "ended"
+        default:
+            data["type"] = type.rawValue
+        }
+        self.emit("audioSession.interruption", data: data)
     }
 }
 
@@ -306,10 +332,11 @@ extension Agent: RTCAudioSessionDelegate {
     }
 
     public func audioSessionDidStopPlayOrRecord(_ session: RTCAudioSession) {
+        self.plugin.emit("agent.audioSessionDidStopPlayOrRecord")
     }
 
     public func audioSession(_ session: RTCAudioSession, didChangeCanPlayOrRecord canPlayOrRecord: Bool) {
-        self.plugin.emit("agent.didChangeCanPlayOrRecord")
+        self.plugin.emit("agent.didChangeCanPlayOrRecord", data: ["canPlayOrRecord": canPlayOrRecord])
     }
 }
 
