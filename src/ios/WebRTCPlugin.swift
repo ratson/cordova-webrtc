@@ -16,8 +16,13 @@ public class WebRTCPlugin : CDVPlugin {
         SimplePeer.initialize()
 
         NotificationCenter.default.addObserver(
-            self, selector: #selector(Self.handleAudioSessionInterruption(_:)),
+            self, selector: #selector(Self.handleAudioSessionInterruption),
             name: AVAudioSession.interruptionNotification,
+            object: nil)
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(Self.handleAudioSessionRouteChange),
+            name: AVAudioSession.routeChangeNotification,
             object: nil)
     }
 
@@ -66,6 +71,17 @@ extension WebRTCPlugin {
             data["type"] = type.rawValue
         }
         self.emit("audioSession.interruption", data: data)
+    }
+
+    @objc func handleAudioSessionRouteChange(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue:reasonValue) else {
+            return
+        }
+
+        let data: Dictionary<String, Any> = ["reason": "\(reason)"]
+        self.emit("audioSession.routeChange", data: data)
     }
 }
 
