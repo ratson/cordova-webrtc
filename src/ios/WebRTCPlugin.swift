@@ -87,6 +87,7 @@ extension WebRTCPlugin {
               let active = opt["active"] as? Bool?,
               let isAudioEnabled = opt["isAudioEnabled"] as? Bool?,
               let category = opt["category"] as? String?,
+              let categoryOptions = opt["categoryOptions"] as? UInt?,
               let inputGain = opt["inputGain"] as? Float?,
               let mode = opt["mode"] as? String?,
               let portOverride = opt["portOverride"] as? String?
@@ -106,11 +107,18 @@ extension WebRTCPlugin {
         do {
             if let v = category {
                 let category = AVAudioSession.Category(rawValue: v)
-                try audioSession.setCategory(category.rawValue, with: [
-                    .allowAirPlay,
-                    .allowBluetoothA2DP,
-                    .mixWithOthers,
-                ])
+
+                if let i = categoryOptions {
+                    try audioSession.setCategory(category.rawValue, with: AVAudioSession.CategoryOptions(rawValue: i))
+                } else {
+                    try audioSession.setCategory(category.rawValue, with: [
+                        .allowAirPlay,
+                        .allowBluetooth,
+                        .allowBluetoothA2DP,
+                        .defaultToSpeaker,
+                        .mixWithOthers
+                    ])
+                }
             }
             if let v = inputGain {
                 try audioSession.setInputGain(v)

@@ -44,7 +44,7 @@ class Agent {
       }
     };
     pc.onnegotiationneeded = () => {
-    }
+    };
     pc.onsignalingstatechange = () => {
       if (pc.signalingState === "stable") {
         this._isNegotiating = false;
@@ -143,6 +143,7 @@ class WebRTCPlugin {
       | "playback"
       | "record"
       | "soloAmbient";
+    categoryOptions?: number;
     mode?:
       | "default"
       | "gameChat"
