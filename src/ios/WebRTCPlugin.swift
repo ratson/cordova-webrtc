@@ -57,30 +57,26 @@ extension WebRTCPlugin {
     @objc func handleAudioSessionInterruption(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,
               let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
-              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+              let _ = AVAudioSession.InterruptionType(rawValue: typeValue) else {
             return
         }
 
-        var data: Dictionary<String, Any> = [:]
-        switch type {
-        case .began:
-            data["type"] = "began"
-        case .ended:
-            data["type"] = "ended"
-        default:
-            data["type"] = type.rawValue
-        }
+        let data: Dictionary<String, Any> = [
+            "interruptionType": typeValue,
+        ]
         self.emit("audioSession.interruption", data: data)
     }
 
     @objc func handleAudioSessionRouteChange(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,
               let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
-              let reason = AVAudioSession.RouteChangeReason(rawValue:reasonValue) else {
+              let _ = AVAudioSession.RouteChangeReason(rawValue:reasonValue) else {
             return
         }
 
-        let data: Dictionary<String, Any> = ["reason": "\(reason)"]
+        let data: Dictionary<String, Any> = [
+            "changeReason": reasonValue,
+        ]
         self.emit("audioSession.routeChange", data: data)
     }
 }
