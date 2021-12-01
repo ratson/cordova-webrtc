@@ -157,11 +157,13 @@ class WebRTCPlugin {
   }) {
     const category = opts.category
       ? `AVAudioSessionCategory${opts.category[0].toUpperCase()}${
-        opts.category.substr(1)
+        opts.category.substring(1)
       }`
       : undefined;
     const mode = opts.mode
-      ? `AVAudioSessionMode${opts.mode[0].toUpperCase()}${opts.mode.substr(1)}`
+      ? `AVAudioSessionMode${opts.mode[0].toUpperCase()}${
+        opts.mode.substring(1)
+      }`
       : undefined;
     return execAsync("configAudio", { ...opts, category, mode });
   }
