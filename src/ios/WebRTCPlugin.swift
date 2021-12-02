@@ -113,7 +113,6 @@ extension WebRTCPlugin {
                 } else {
                     try audioSession.setCategory(category.rawValue, with: [
                         .allowAirPlay,
-                        .allowBluetooth,
                         .allowBluetoothA2DP,
                         .defaultToSpeaker,
                         .mixWithOthers
