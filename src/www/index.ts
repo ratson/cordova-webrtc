@@ -165,6 +165,11 @@ class WebRTCPlugin {
         opts.mode.substring(1)
       }`
       : undefined;
+    if (opts.inputGain && opts.inputGain < 0) {
+      throw new Error(
+        `\`inputGain\` value should be positive: ${opts.inputGain}`,
+      );
+    }
     return execAsync("configAudio", { ...opts, category, mode });
   }
 
