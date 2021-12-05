@@ -37,7 +37,6 @@
                 <string>audio</string>
                 <string>fetch</string>
                 <string>remote-notification</string>
-                <string>voip</string>
             </array>
         </config-file>
         <config-file target="config.xml" parent="/*">
