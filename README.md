@@ -29,4 +29,4 @@ Android has good support for using WebRTC in webview, by setting the neccessary 
 
 Recent iOS webview provides some support for WebRTC, but the integration is not good, especially when use with media playback or in background. This plugin provides an `agent` API to workaround it. The idea is to establish a peer connection between native code and webview for `getUserMedia()`, then forward the stream to other peer connections.
 
-Some example usage could be found in [cordova-webrtc-lab repo](https://github.com/ratson/cordova-webrtc-lab). Feel free to opne new issues if there is any questions.
+Some example usage could be found in [cordova-webrtc-samples](https://github.com/ratson/cordova-webrtc-samples) or [cordova-webrtc-lab](https://github.com/ratson/cordova-webrtc-lab). Feel free to opne new issues if there is any questions.
